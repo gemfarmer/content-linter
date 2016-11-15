@@ -1,4 +1,6 @@
 require 'octokit'
+require 'pry'
+require 'rb-readline'
 # app/controllers/github_webhooks_controller.rb
 class GithubWebhooksController < ActionController::Base
   include ::GithubWebhook::Processor
@@ -37,7 +39,7 @@ class GithubWebhooksController < ActionController::Base
     repo_name = payload['pull_request']['head']['repo']['full_name']
     pull_request_number = payload['pull_request']['number']
     last_commit = payload['pull_request']['head']['sha']
-
+    diff_url = payload['pull_request']['diff_url']
 
     # stack = Faraday::RackBuilder.new do |builder|
     #   builder.response :logger
@@ -50,10 +52,14 @@ class GithubWebhooksController < ActionController::Base
     files_changed = client.commit('gemfarmer/github_webhook', last_commit)['files']
     num_files_changed = files_changed.length
     first_file = files_changed.first['filename']
+    diff = `wget #{diff_url} -O -`
     puts "----------------------------------"
     puts "for repo: #{repo_name.inspect}"
     puts "pull_request: #{pull_request_number.inspect}"
     puts "latest commit sha: #{last_commit.inspect}"
+    puts "diff url: #{diff_url.inspect}"
+    puts "----------------------------------"
+    puts "diff: #{diff.inspect}"
     puts "----------------------------------"
     puts "#{num_files_changed.inspect} files changed: #{files_changed.inspect}"
     puts "----------------------------------"
@@ -61,6 +67,11 @@ class GithubWebhooksController < ActionController::Base
     files_changed.each do |file|
       puts "==============================="
       puts "for file: #{file['filename']}"
+      puts "patch looks as follows:"
+      puts "-------------------------------"
+      puts "#{file['patch'].inspect}"
+      # lines = extract_lines(file['patch'])
+      # puts "lines: #{lines}"
 
       # client.pull_request_comments("gemfarmer/github_webhook", 13)
       # client.update_pull_request_comment("gemfarmer/github_webhook", 86395987, 'from app: hola in comment')
@@ -102,6 +113,34 @@ class GithubWebhooksController < ActionController::Base
   # Handle create event
   def github_create(payload)
     # TODO: handle create webhook
+  end
+
+  def find_lines(diff)
+    response = {}
+    cleaned = diff.gsub("+", '').gsub('-', '').split(' ')
+    response = {
+      removed: {
+        from: cleaned[0].split(',')[0],
+        to: cleaned[0].split(',')[1]
+      },
+      added: {
+        from: cleaned[1].split(',')[0],
+        to: cleaned[1].split(',')[1]
+      }
+    }
+  end
+
+  def extract_lines(patch)
+    response = {}
+    new_lines = []
+    lines = patch.split('@@')
+    lines = lines.slice(1, lines.length)
+    lines[0] = lines[0].strip
+    lines[1] = lines[1].strip
+    lines.each {|line| new_lines << line.split(/\r?\n/)}
+    new_lines = new_lines.flatten
+    response = find_lines(new_lines[0])
+    # response['diff']
   end
 
   def webhook_secret(payload)
