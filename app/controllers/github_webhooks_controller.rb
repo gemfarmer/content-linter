@@ -34,6 +34,7 @@ class GithubWebhooksController < ActionController::Base
     # http://octokit.github.io/octokit.rb/Octokit/Client/Contents.html#contents-instance_methodstick
   end
 
+
   def github_pull_request(payload)
     puts 'pull request received'
     repo_name = payload['pull_request']['head']['repo']['full_name']
@@ -67,9 +68,18 @@ class GithubWebhooksController < ActionController::Base
     files_changed.each do |file|
       puts "==============================="
       puts "for file: #{file['filename']}"
-      puts "patch looks as follows:"
-      puts "-------------------------------"
-      puts "#{file['patch'].inspect}"
+      # puts "patch looks as follows:"
+      # puts "-------------------------------"
+      # puts "#{file['patch'].inspect}"
+      contents = client.contents(
+        "#{repo_name}",
+        path: "#{file[filename]}",
+        ref: "#{last_commit}"
+      )
+
+      file_contents = Base64.decode64(contents.content).force_encoding("UTF-8")
+
+
       # lines = extract_lines(file['patch'])
       # puts "lines: #{lines}"
 

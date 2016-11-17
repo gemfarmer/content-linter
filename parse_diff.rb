@@ -94,7 +94,7 @@ diffed_files.each do | file |
 	line_start = file['line'][:start]
 	file['offending_lines'].each do |line|
 		violating_words.each do | word |
-			puts "flagged word: #{word.inspect} at #{line_start} in #{file['file_path']}" if line =~ /#{word}/
+			puts "flagged word: #{word.inspect} at line #{line_start} in #{file['file_path']}" if line =~ /#{word}/
 		end
 		# binding.pry
 		line_start = line_start + 1

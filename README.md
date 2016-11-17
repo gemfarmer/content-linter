@@ -5,6 +5,11 @@
 - [ ] Lint content
 - [ ] Send appropriate message back
 
+# Other linters
+- https://github.com/Shopify/linter-rorybot
+- https://github.com/18F/retext-18f
+- https://github.com/wooorm/remark-lint/
+
 # README
 
 This README would normally document whatever steps are necessary to get the
