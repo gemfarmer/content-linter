@@ -12,6 +12,7 @@ class GithubFileContents
 		Base64.decode64(contents.content).force_encoding("UTF-8")
 	end
 
+
 	private
 
 	attr_reader :filename, :repo, :sha

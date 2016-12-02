@@ -7,8 +7,6 @@ describe GithubFileContents do
 		repo = 'gemfarmer/github_webhook'
 		sha = '20345d0ee431c230e90c84e8ee454e74ec9bec21'
 
-
-
 		response = {
 			:name=>"second.md",
 			:path=>"second.md",

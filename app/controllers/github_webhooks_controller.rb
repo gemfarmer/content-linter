@@ -34,7 +34,6 @@ class GithubWebhooksController < ActionController::Base
     # http://octokit.github.io/octokit.rb/Octokit/Client/Contents.html#contents-instance_methodstick
   end
 
-
   def github_pull_request(payload)
     puts 'pull request received'
     repo_name = payload['pull_request']['head']['repo']['full_name']
@@ -42,68 +41,22 @@ class GithubWebhooksController < ActionController::Base
     last_commit = payload['pull_request']['head']['sha']
     diff_url = payload['pull_request']['diff_url']
 
-    # stack = Faraday::RackBuilder.new do |builder|
-    #   builder.response :logger
-    #   builder.use Octokit::Response::RaiseError
-    #   builder.adapter Faraday.default_adapter
-    # end
-    # client = Octokit::Client.new(access_token: Figaro.env.github_2FA_token)
-    client = Octokit::Client.new(login: 'gemfarmer-linter', password: Figaro.env.github_password)
-    # client.middleware = stack
-    files_changed = client.commit('gemfarmer/github_webhook', last_commit)['files']
+    files_changed = PullRequestFiles.new(repo_name, last_commit).changed_files
+
     num_files_changed = files_changed.length
     first_file = files_changed.first['filename']
-    diff = `wget #{diff_url} -O -`
-    puts "----------------------------------"
-    puts "for repo: #{repo_name.inspect}"
-    puts "pull_request: #{pull_request_number.inspect}"
-    puts "latest commit sha: #{last_commit.inspect}"
-    puts "diff url: #{diff_url.inspect}"
-    puts "----------------------------------"
-    puts "diff: #{diff.inspect}"
-    puts "----------------------------------"
-    puts "#{num_files_changed.inspect} files changed: #{files_changed.inspect}"
-    puts "----------------------------------"
 
     files_changed.each do |file|
-      puts "==============================="
-      puts "for file: #{file['filename']}"
-      # puts "patch looks as follows:"
-      # puts "-------------------------------"
-      # puts "#{file['patch'].inspect}"
-      contents = client.contents(
-        "#{repo_name}",
-        path: "#{file[filename]}",
-        ref: "#{last_commit}"
-      )
+      file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
 
-      file_contents = Base64.decode64(contents.content).force_encoding("UTF-8")
-
-
-      # lines = extract_lines(file['patch'])
-      # puts "lines: #{lines}"
-
-      # client.pull_request_comments("gemfarmer/github_webhook", 13)
-      # client.update_pull_request_comment("gemfarmer/github_webhook", 86395987, 'from app: hola in comment')
-
-      # example create_pull_request_comment comment
-      # client.create_pull_request_comment(
-      #   repo,
-      #   pull request number,
-      #   comment message,
-      #   target commit,
-      #   file name,
-      #   line number to flag
-      # )
-      client.create_pull_request_comment(
+      Octokit.create_pull_request_comment(
         repo_name,
         pull_request_number,
-        "error in #{file['filename']} for commit #{last_commit}",
+        "error in #{file[:filename]} for commit #{last_commit}",
         last_commit,
-        file['filename'],
+        file[:filename],
         1
       )
-      puts "==============================="
     end
 
     # Content blob:
@@ -115,6 +68,8 @@ class GithubWebhooksController < ActionController::Base
     # Octokit source:
     # https://github.com/octokit/octokit.rb/blob/master/lib/octokit/client/pull_requests.rb
   end
+
+
 
   def github_pull_request_review_comment(payload)
 
