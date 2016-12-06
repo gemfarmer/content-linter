@@ -49,14 +49,24 @@ class GithubWebhooksController < ActionController::Base
     files_changed.each do |file|
       file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
 
-      Octokit.create_pull_request_comment(
-        repo_name,
-        pull_request_number,
-        "error in #{file[:filename]} for commit #{last_commit}",
-        last_commit,
-        file[:filename],
-        1
-      )
+      file_content_linter = FileContentLinter.new({file_contents: file_contents})
+
+      content_errors = file_content_linter.lint
+
+      content_errors.each do |error|
+        error_message = "error in #{file[:filename]} for commit #{last_commit} for #{error[:word]}"
+        line = error[:word]
+
+        Octokit.create_pull_request_comment(
+          repo_name,
+          pull_request_number,
+          error_message,
+          last_commit,
+          file[:filename],
+          line
+        )
+      end
+
     end
 
     # Content blob:
