@@ -1,32 +1,29 @@
 require 'pry'
 
 class FileContentLinter
-	attr_accessor :file_contents, :violating_words
+  attr_accessor :file_contents, :violating_words
 
-	def initialize(options = {})
-		violating_words = ['seme word'].freeze
-		# binding.pry
-		@file_contents = options[:file_contents]
-		@violating_words = options[:violating_words].freeze || violating_words
-		# @offending_lines
-	end
+  def initialize(options = {})
+    violating_words = ['seme word'].freeze
+    @file_contents = options[:file_contents]
+    @violating_words = options[:violating_words].freeze || violating_words
+  end
 
-	def lint
+  def lint
     content_errors = []
-    contents_array = @file_contents.split('\n')
-		@violating_words.each do | word |
-			contents_array.each do | line |
-				puts "found: #{word}" if line =~ /#{word}/
-				content_errors << { word: word, line: 0 } if line =~ /#{word}/
-			end
-		end
-		content_errors
-	end
+    contents_array = @file_contents.split("\n")
+    @violating_words.each do | word |
+      contents_array.each_with_index do | line, index |
+        puts "line: #{line}"
+        puts "found word: #{word} on line #{index + 1}" if line =~ /#{word}/
 
-	def lint_line
-	end
+        content_errors << { word: word, line: (index + 1) } if line =~ /#{word}/
+      end
+    end
+    content_errors
+  end
 
-	private
+  private
 
-	attr_reader :file_contents, :violating_words
+  attr_reader :file_contents, :violating_words
 end
