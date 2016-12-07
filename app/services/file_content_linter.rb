@@ -1,29 +1,62 @@
 require 'pry'
+require 'yaml'
 
 class FileContentLinter
-  attr_accessor :file_contents, :violating_words
+  attr_accessor :file_contents, :rules
 
   def initialize(options = {})
-    violating_words = ['seme word'].freeze
+    if options[:rules]
+      @rules = options[:rules].freeze
+    else
+      @rules = YAML.load_file('mdlinter.yml').freeze
+    end
     @file_contents = options[:file_contents]
-    @violating_words = options[:violating_words].freeze || violating_words
+    @content_warnings = []
+    @warning_types = [
+      "replace"
+    ]
+    @haha = []
+
   end
 
   def lint
-    content_errors = []
-    contents_array = @file_contents.split("\n")
-    @violating_words.each do | word |
-      contents_array.each_with_index do | line, index |
-        puts "line: #{line}"
-        puts "found word: #{word} on line #{index + 1}" if line =~ /#{word}/
-
-        content_errors << { word: word, line: (index + 1) } if line =~ /#{word}/
+    if @rules['config']
+      @rules['config'].each do | rule |
+        @file_contents.split("\n").each_with_index do | line, index |
+          check_rule(rule, line, index)
+        end
       end
     end
-    content_errors
+    @content_warnings
+  end
+
+  def check_rule(rule, line, index)
+    warning_response = {}
+    word = rule.keys[0]
+
+    if line.downcase.include? word.downcase
+      warning_response[:word] = word
+      warning_response[:line] = index + 1
+
+      specs = rule[word]
+
+      @warning_types.each do |type|
+        specs_type = specs[type]
+        if specs_type
+          warning_response[type.to_sym] = specs_type
+          warning_response[:type] = type
+        end
+      end
+
+      if specs['reason']
+        warning_response[:reason] = specs['reason']
+      end
+
+      @content_warnings << warning_response if !warning_response.empty?
+    end
   end
 
   private
 
-  attr_reader :file_contents, :violating_words
+  attr_reader :file_contents, :rules
 end

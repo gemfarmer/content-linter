@@ -2,57 +2,86 @@ require 'rails_helper'
 
 describe FileContentLinter do
   it 'returns offending lines in a given set of content' do
-    file_contents = "start new file\nmore text here\neven more\nand more\n...\n"
+    file = "#{Rails.root}/mdlinter.yml"
+    repo = 'gemfarmer/github_webhook'
+    sha = '20345d0ee431c230e90c84e8ee454e74ec9bec21'
 
-    violating_words = ['start', 'new file', 'and']
-    violating_words_2 = ['more']
+    file_contents = "18Fers are generally great people.\nThat's why 18F is a great place to work\n"
 
-    expected_error = [
+    linter_rules = {
+      "config"=> [
+        {"18F-er"=>{"replace"=>["18F team member", "18F staffer"], "reason"=>"F-er can imply profanity"}},
+        {"18Fer"=>{"replace"=>["18F team member", "18F staffer"], "reason"=>"F-er can imply profanity"}},
+        {"backend"=>{"replace"=>["back end", "back end development"]}}
+      ]
+    }
+
+    expected_warning = [
       {
-        word: "start",
-        line: 1
-      },
-      {
-        word: "new file",
-        line: 1
-      },
-      {
-        word: "and",
-        line: 4
+        word: "18Fer",
+        line: 1,
+        type: "replace",
+        reason: "F-er can imply profanity",
+        replace: ["18F team member", "18F staffer"]
       }
     ]
 
+    allow(Octokit).to receive(:contents).with(repo, path: file, ref: sha).and_return(linter_rules)
+
+
     file_content_linter = FileContentLinter.new(
-      { file_contents: file_contents, violating_words: violating_words }
+      { file_contents: file_contents, rules: linter_rules }
     )
 
-    expect(file_content_linter.lint).to eq expected_error
+    expect(file_content_linter.lint).to eq expected_warning
   end
 
-  it 'finds error for same word on multiple ilnes' do
-    file_contents = "start new file\nmore text here\neven more\nand more\n...\n"
+  it 'finds error for same word on multiple lines' do
+    file = "#{Rails.root}/mdlinter.yml"
+    repo = 'gemfarmer/github_webhook'
+    sha = '20345d0ee431c230e90c84e8ee454e74ec9bec21'
 
-    violating_words = ['more']
+    file_contents = "Working for 18F is sometimes great\nBut sometimes we repeat ourselves.\nIn those sometimes it is not so great\n"
 
-    expected_error = [
+    linter_rules = {
+      "config"=> [
+        {"18F-er"=>{"replace"=>["18F team member", "18F staffer"], "reason"=>"F-er can imply profanity"}},
+        {"18Fer"=>{"replace"=>["18F team member", "18F staffer"], "reason"=>"F-er can imply profanity"}},
+        {"sometimes"=>{"replace"=>["generally"], "reason"=>"plain language"}}
+      ]
+    }
+
+    expected_warning = [
       {
-        word: "more",
-        line: 2
+        word: "sometimes",
+        line: 1,
+        type: "replace",
+        reason: "plain language",
+        replace: ["generally"]
       },
       {
-        word: "more",
-        line: 3
+        word: "sometimes",
+        line: 2,
+        type: "replace",
+        reason: "plain language",
+        replace: ["generally"]
       },
       {
-        word: "more",
-        line: 4
+        word: "sometimes",
+        line: 3,
+        type: "replace",
+        reason: "plain language",
+        replace: ["generally"]
       }
     ]
 
+    allow(Octokit).to receive(:contents).with(repo, path: file, ref: sha).and_return(linter_rules)
+
+
     file_content_linter = FileContentLinter.new(
-      { file_contents: file_contents, violating_words: violating_words }
+      { file_contents: file_contents, rules: linter_rules }
     )
 
-    expect(file_content_linter.lint).to eq expected_error
+    expect(file_content_linter.lint).to eq expected_warning
   end
 end
