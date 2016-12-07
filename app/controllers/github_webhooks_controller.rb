@@ -58,10 +58,9 @@ class GithubWebhooksController < ActionController::Base
       content_errors = file_content_linter.lint
 
       if !content_errors.empty?
-        binding.pry
         content_errors.each do |error|
-          binding.pry
-          error_message = "error in #{file[:filename]} for commit #{last_commit} for #{error[:word]}"
+          # error_message = "error in #{file[:filename]} for commit #{last_commit} for #{error[:word]}"
+          error_message = error[:message]
           line = error[:line]
 
           Octokit.create_pull_request_comment(

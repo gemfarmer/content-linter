@@ -41,10 +41,11 @@ class FileContentLinter
       specs = rule[word]
 
       @warning_types.each do |type|
-        specs_type = specs[type]
-        if specs_type
-          warning_response[type.to_sym] = specs_type
+        spec = specs[type]
+        if spec
+          warning_response[type.to_sym] = spec
           warning_response[:type] = type
+          warning_response[:message] = format_message(word, spec, specs['reason'])
         end
       end
 
@@ -54,6 +55,29 @@ class FileContentLinter
 
       @content_warnings << warning_response if !warning_response.empty?
     end
+  end
+
+  def format_message(word, spec, reason = '')
+    if spec.kind_of?(Array)
+      replacement = spec.each_with_index.map do |s, i|
+        if i == spec.length - 1
+          "`#{s}`"
+        elsif i == spec.length - 2
+         spec.length > 2 ? "`#{s}`, or " : "`#{s}` or ";
+        else
+          "`#{s}`, "
+        end
+      end.join
+    else
+      replacement = spec
+    end
+
+    if reason
+      "Consider replacing `#{word}` with #{replacement}. #{reason}."
+    else
+      "Consider replacing `#{word}` with #{replacement}."
+    end
+    # binding.pry
   end
 
   private
