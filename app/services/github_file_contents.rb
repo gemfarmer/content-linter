@@ -7,9 +7,9 @@ class GithubFileContents
 
 	def file_content
 		begin
-			contents = Octokit.contents(repo, path: filename, ref: sha)
+			contents = Octokit.contents(@repo, path: @filename, ref: @sha)
 		rescue
-			puts "Error: Could not get contents from GitHub"
+			puts "Error: Could not get contents for #{@filename} from GitHub"
 		else
 			Base64.decode64(contents.content).force_encoding("UTF-8")
 		end

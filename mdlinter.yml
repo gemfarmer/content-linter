@@ -3,12 +3,12 @@ config:
       replace:
         - '18F team members'
         - '18F staffers'
-      reason: F-er can imply profanity
+      reason: 'F-er' can imply profanity
   - 18Fer:
       replace:
         - 18F team members
         - 18F staffers
-      reason: F-er can imply profanity
+      reason: 'F-er' can imply profanity
   - backend:
       replace:
         - back end

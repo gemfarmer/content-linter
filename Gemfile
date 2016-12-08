@@ -34,6 +34,7 @@ gem "figaro"
 gem 'github_webhook', '~> 1.0'
 gem "octokit"
 gem "rb-readline"
+gem "json"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

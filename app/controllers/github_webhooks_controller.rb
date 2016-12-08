@@ -49,9 +49,9 @@ class GithubWebhooksController < ActionController::Base
     files_changed.each do |file|
       file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
 
-      linter_rules = GithubFileContents.new(repo_name, 'mdlinter.yml', last_commit).file_content
+      # linter_rules = GithubFileContents.new(repo_name, 'mdlinter.json', last_commit).file_content
       content_linter_options = { file_contents: file_contents }
-      content_linter_options[:rules] = linter_rules if linter_rules
+      # content_linter_options[:rules] = linter_rules if linter_rules
 
       file_content_linter = FileContentLinter.new(content_linter_options)
 
@@ -59,7 +59,7 @@ class GithubWebhooksController < ActionController::Base
 
       if !content_errors.empty?
         content_errors.each do |error|
-          # error_message = "error in #{file[:filename]} for commit #{last_commit} for #{error[:word]}"
+
           error_message = error[:message]
           line = error[:line]
 

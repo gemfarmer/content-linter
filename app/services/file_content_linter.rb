@@ -1,5 +1,6 @@
 require 'pry'
 require 'yaml'
+require 'json'
 
 class FileContentLinter
   attr_accessor :file_contents, :rules
@@ -8,7 +9,9 @@ class FileContentLinter
     if options[:rules]
       @rules = options[:rules].freeze
     else
-      @rules = YAML.load_file('mdlinter.yml').freeze
+      # @rules = YAML.load_file('mdlinter.yml').freeze
+      file = File.read('mdlinter.json')
+      @rules = JSON.parse(file).freeze
     end
     @file_contents = options[:file_contents]
     @content_warnings = []
