@@ -3,7 +3,6 @@ require 'yaml'
 require 'json'
 
 class FileContentLinter
-  attr_accessor :file_contents, :rules
 
   def initialize(options = {})
     if options[:rules]
@@ -12,31 +11,31 @@ class FileContentLinter
       # @rules = YAML.load_file('mdlinter.yml').freeze
       file = File.read('mdlinter.json')
       @rules = JSON.parse(file).freeze
+      puts "@rules: #{@rules}"
     end
     @file_contents = options[:file_contents]
-    @content_warnings = []
     @warning_types = [
       "replace"
     ]
-    @haha = []
-
   end
 
   def lint
+    content_warnings = []
     if @rules['config']
       @rules['config'].each do | rule |
         @file_contents.split("\n").each_with_index do | line, index |
-          check_rule(rule, line, index)
+          obj = check_rule(rule, line, index)
+          content_warnings << obj if obj.present?
         end
       end
     end
-    @content_warnings
+    # binding.pry
+    content_warnings
   end
 
   def check_rule(rule, line, index)
     warning_response = {}
     word = rule.keys[0]
-
     if line.downcase.include? word.downcase
       warning_response[:word] = word
       warning_response[:line] = index + 1
@@ -55,9 +54,8 @@ class FileContentLinter
       if specs['reason']
         warning_response[:reason] = specs['reason']
       end
-
-      @content_warnings << warning_response if !warning_response.empty?
     end
+    warning_response
   end
 
   def format_message(word, spec, reason = '')

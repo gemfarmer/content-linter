@@ -42,33 +42,28 @@ class GithubWebhooksController < ActionController::Base
     diff_url = payload['pull_request']['diff_url']
 
     files_changed = PullRequestFiles.new(repo_name, last_commit).changed_files
-
+    puts "files_changed: #{files_changed}"
     num_files_changed = files_changed.length
     first_file = files_changed.first['filename']
 
     files_changed.each do |file|
       file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
-
-      # linter_rules = GithubFileContents.new(repo_name, 'mdlinter.json', last_commit).file_content
       content_linter_options = { file_contents: file_contents }
-      # content_linter_options[:rules] = linter_rules if linter_rules
-
       file_content_linter = FileContentLinter.new(content_linter_options)
-
       content_errors = file_content_linter.lint
-
       if !content_errors.empty?
         content_errors.each do |error|
 
           error_message = error[:message]
           line = error[:line]
+          filename = file[:filename]
 
           Octokit.create_pull_request_comment(
             repo_name,
             pull_request_number,
             error_message,
             last_commit,
-            file[:filename],
+            filename,
             line
           )
         end
