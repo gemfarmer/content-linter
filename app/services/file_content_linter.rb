@@ -29,7 +29,6 @@ class FileContentLinter
         end
       end
     end
-    # binding.pry
     content_warnings
   end
 
@@ -55,6 +54,7 @@ class FileContentLinter
         warning_response[:reason] = specs['reason']
       end
     end
+    puts "warning_response: #{warning_response}"
     warning_response
   end
 
@@ -78,7 +78,6 @@ class FileContentLinter
     else
       "Consider replacing `#{word}` with #{replacement}."
     end
-    # binding.pry
   end
 
   private

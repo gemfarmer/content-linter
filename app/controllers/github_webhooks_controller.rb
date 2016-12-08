@@ -48,15 +48,29 @@ class GithubWebhooksController < ActionController::Base
 
     files_changed.each do |file|
       file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
+      puts '----------------------'
+      puts "filename: #{file[:filename]}"
+      # puts "file_contents: #{file_contents}"
       content_linter_options = { file_contents: file_contents }
+
       file_content_linter = FileContentLinter.new(content_linter_options)
       content_errors = file_content_linter.lint
+
+      puts "content errors: #{content_errors.inspect}"
+      # puts '----------------------'
       if !content_errors.empty?
         content_errors.each do |error|
 
           error_message = error[:message]
           line = error[:line]
           filename = file[:filename]
+          # puts "repo_name: #{repo_name}"
+          # puts "pull_request_number: #{pull_request_number}"
+          # puts "error_message: #{error_message}"
+          # puts "last_commit: #{last_commit}"
+          puts "filename: #{filename}"
+          puts "line: #{line}"
+          puts '=============='
 
           Octokit.create_pull_request_comment(
             repo_name,
@@ -116,7 +130,6 @@ class GithubWebhooksController < ActionController::Base
     lines.each {|line| new_lines << line.split(/\r?\n/)}
     new_lines = new_lines.flatten
     response = find_lines(new_lines[0])
-    # response['diff']
   end
 
   def webhook_secret(payload)
