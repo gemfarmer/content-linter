@@ -9,9 +9,8 @@ class FileContentLinter
     file = file || 'mdlinter.json'
     file = File.read(file)
     @rules = JSON.parse(file).freeze
-    #{}"#{file_type.capitalize}ConfigValidator".constantize.new(file).validate
+
     ConfigValidator.new(@rules).validate
-    # puts "@rules: #{@rules}"
 
     @file_contents = file_contents
     @warning_types = [
@@ -56,7 +55,6 @@ class FileContentLinter
         warning_response[:reason] = specs['reason']
       end
     end
-    # puts "warning_response: #{warning_response}"
     warning_response
   end
 
