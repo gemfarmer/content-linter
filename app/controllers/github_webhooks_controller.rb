@@ -35,42 +35,28 @@ class GithubWebhooksController < ActionController::Base
   end
 
   def github_pull_request(payload)
-    puts 'pull request received'
     repo_name = payload['pull_request']['head']['repo']['full_name']
     pull_request_number = payload['pull_request']['number']
     last_commit = payload['pull_request']['head']['sha']
     diff_url = payload['pull_request']['diff_url']
 
     files_changed = PullRequestFiles.new(repo_name, last_commit).changed_files
-    puts "files_changed: #{files_changed}"
     num_files_changed = files_changed.length
     first_file = files_changed.first['filename']
 
     files_changed.each do |file|
       file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
-      puts '----------------------'
-      puts "filename: #{file[:filename]}"
-      # puts "file_contents: #{file_contents}"
       content_linter_options = { file_contents: file_contents }
 
       file_content_linter = FileContentLinter.new(content_linter_options)
       content_errors = file_content_linter.lint
 
-      puts "content errors: #{content_errors.inspect}"
-      # puts '----------------------'
       if !content_errors.empty?
         content_errors.each do |error|
 
           error_message = error[:message]
           line = error[:line]
           filename = file[:filename]
-          # puts "repo_name: #{repo_name}"
-          # puts "pull_request_number: #{pull_request_number}"
-          # puts "error_message: #{error_message}"
-          # puts "last_commit: #{last_commit}"
-          puts "filename: #{filename}"
-          puts "line: #{line}"
-          puts '=============='
 
           Octokit.create_pull_request_comment(
             repo_name,
