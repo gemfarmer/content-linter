@@ -7,12 +7,12 @@ describe FileContentLinter do
 
       expected_warning = [
         {
-          word: "collaborate",
+          word: 'collaborate',
           line: 1,
-          type: "replace",
-          reason: "plain language",
-          replace: ["working with"],
-          message: "Consider replacing `collaborate` with `working with`. plain language."
+          type: 'replace',
+          reason: 'plain language',
+          replace: ['working with'],
+          message: 'Consider replacing `collaborate` with `working with`. plain language.'
         }
       ]
 
@@ -29,12 +29,12 @@ describe FileContentLinter do
 
       expected_warning = [
         {
-          word: "collaborate",
+          word: 'collaborate',
           line: 1,
-          type: "replace",
-          reason: "plain language",
-          replace: ["working with"],
-          message: "Consider replacing `collaborate` with `working with`. plain language."
+          type: 'replace',
+          reason: 'plain language',
+          replace: ['working with'],
+          message: 'Consider replacing `collaborate` with `working with`. plain language.'
         }
       ]
 
@@ -50,18 +50,18 @@ describe FileContentLinter do
 
       expected_warning = [
         {
-          word: "dropdown",
+          word: 'dropdown',
           line: 1,
-          type: "replace",
-          replace: ["drop-down menu", "drop down"],
-          message: "Consider replacing `dropdown` with `drop-down menu` or `drop down`."
+          type: 'replace',
+          replace: ['drop-down menu', 'drop down'],
+          message: 'Consider replacing `dropdown` with `drop-down menu` or `drop down`.'
         },
         {
-          word: "dropdown",
+          word: 'dropdown',
           line: 2,
-          type: "replace",
-          replace: ["drop-down menu", "drop down"],
-          message: "Consider replacing `dropdown` with `drop-down menu` or `drop down`."
+          type: 'replace',
+          replace: ['drop-down menu', 'drop down'],
+          message: 'Consider replacing `dropdown` with `drop-down menu` or `drop down`.'
         }
       ]
 
@@ -73,5 +73,3 @@ describe FileContentLinter do
     end
   end
 end
-
-

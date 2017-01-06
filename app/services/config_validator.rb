@@ -3,7 +3,6 @@ require 'yaml'
 require 'json'
 
 class ConfigValidator
-
   def initialize(rules)
     @rules = rules
   end
@@ -17,7 +16,7 @@ class ConfigValidator
   private
 
   def validate_rules_config
-    raise "Invalid config. Top level config key missing" unless rules['config']
+    raise 'Invalid config. Top level config key missing' unless rules['config']
   end
 
   def validate_rules_config_array
@@ -25,7 +24,7 @@ class ConfigValidator
   end
 
   def validate_rules_config_array_contents
-    raise "Invalid config. Their are no rules in the configuration" unless rules['config'].any?
+    raise 'Invalid config. Their are no rules in the configuration' unless rules['config'].any?
   end
 
   attr_reader :rules
