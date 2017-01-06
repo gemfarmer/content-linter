@@ -73,5 +73,3 @@ describe FileContentLinter do
     end
   end
 end
-
-
