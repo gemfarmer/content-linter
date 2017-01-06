@@ -4,16 +4,15 @@ require 'json'
 
 class FileContentLinter
 
-  def initialize(options = {})
-    if options[:rules]
-      @rules = options[:rules].freeze
-    else
-      # @rules = YAML.load_file('mdlinter.yml').freeze
-      file = File.read('mdlinter.json')
-      @rules = JSON.parse(file).freeze
-      puts "@rules: #{@rules}"
-    end
-    @file_contents = options[:file_contents]
+  def initialize(file_contents:, file: nil)
+    # @rules = YAML.load_file('mdlinter.yml').freeze
+    file = file || 'mdlinter.json'
+    file = File.read(file)
+    @rules = JSON.parse(file).freeze
+
+    ConfigValidator.new(@rules).validate
+
+    @file_contents = file_contents
     @warning_types = [
       "replace"
     ]
@@ -29,9 +28,10 @@ class FileContentLinter
         end
       end
     end
-    # binding.pry
     content_warnings
   end
+
+  private
 
   def check_rule(rule, line, index)
     warning_response = {}
@@ -78,10 +78,7 @@ class FileContentLinter
     else
       "Consider replacing `#{word}` with #{replacement}."
     end
-    # binding.pry
   end
-
-  private
 
   attr_reader :file_contents, :rules
 end

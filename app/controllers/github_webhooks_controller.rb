@@ -35,22 +35,22 @@ class GithubWebhooksController < ActionController::Base
   end
 
   def github_pull_request(payload)
-    puts 'pull request received'
     repo_name = payload['pull_request']['head']['repo']['full_name']
     pull_request_number = payload['pull_request']['number']
     last_commit = payload['pull_request']['head']['sha']
     diff_url = payload['pull_request']['diff_url']
 
     files_changed = PullRequestFiles.new(repo_name, last_commit).changed_files
-    puts "files_changed: #{files_changed}"
     num_files_changed = files_changed.length
     first_file = files_changed.first['filename']
 
     files_changed.each do |file|
       file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
       content_linter_options = { file_contents: file_contents }
+
       file_content_linter = FileContentLinter.new(content_linter_options)
       content_errors = file_content_linter.lint
+
       if !content_errors.empty?
         content_errors.each do |error|
 
@@ -116,7 +116,6 @@ class GithubWebhooksController < ActionController::Base
     lines.each {|line| new_lines << line.split(/\r?\n/)}
     new_lines = new_lines.flatten
     response = find_lines(new_lines[0])
-    # response['diff']
   end
 
   def webhook_secret(payload)
