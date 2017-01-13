@@ -446,12 +446,6 @@ describe GithubWebhooksController do
         and_return(pull_request_files)
       expect(pull_request_files).to receive(:changed_files).and_return(files_changed)
 
-      # expect(GithubFileContents).to receive(:new).with('gemfarmer/github_webhook', )
-
-
-
-      file = "#{Rails.root}/spec/support/jp.md"
-
       contents_response = {
         name: 'jp.md',
         path: 'jp.md',
@@ -462,7 +456,7 @@ describe GithubWebhooksController do
         git_url:       'https://api.github.com/repos/gemfarmer/github_webhook/git/blobs/b2ac6162d16f4c66edaa08493c2a0b29451b4d4b',
         download_url:       'https://raw.githubusercontent.com/gemfarmer/github_webhook/90e60db2cde7a69b96e7fe7fa88217616b68c474/second.md',
         type: 'file',
-        content: Base64.encode64(File.read(file)),
+        content: Base64.encode64(File.read("#{Rails.root}/spec/support/jp.md")),
         encoding: 'base64',
         _links: {
           self:         'https://api.github.com/repos/gemfarmer/github_webhook/contents/jp.md?ref=90e60db2cde7a69b96e7fe7fa88217616b68c474',
@@ -474,18 +468,6 @@ describe GithubWebhooksController do
       response_body = double('Sawyer::Resource', contents_response)
 
       allow(Octokit).to receive(:contents).with('gemfarmer/github_webhook', path: 'jp.md', ref: '90e60db2cde7a69b96e7fe7fa88217616b68c474').and_return(response_body)
-
-      # stub_request(:get, "https://api.github.com/repos/gemfarmer/github_webhook/contents/jp.md?ref=90e60db2cde7a69b96e7fe7fa88217616b68c474").
-      #    with(:headers => {'Accept'=>'application/vnd.github.v3+json', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>'Basic Z2VtZmFybWVyLWxpbnRlcjpUYW1tYW40NzIy', 'Content-Type'=>'application/json', 'User-Agent'=>'Octokit Ruby Gem 4.6.2'}).
-      #    to_return(:status => 200, :body => contents_response.to_json, :headers => {})
-      # Octokit.create_pull_request_comment(
-      #    repo_name,
-      #    pull_request_number,
-      #    error_message,
-      #    last_commit,
-      #    filename,
-      #    line
-      #  )
 
       3.times do |line_num|
         expect(Octokit).to receive(:create_pull_request_comment).with(
