@@ -4,13 +4,11 @@ require 'json'
 
 class FileContentLinter
   def initialize(file_contents:, file: nil)
-    # @rules = YAML.load_file('mdlinter.yml').freeze
     file ||= 'mdlinter.json'
     file = File.read(file)
     @rules = JSON.parse(file).freeze
-    # {}"#{file_type.capitalize}ConfigValidator".constantize.new(file).validate
+
     ConfigValidator.new(@rules).validate
-    # puts "@rules: #{@rules}"
 
     @file_contents = file_contents
     @warning_types = [
@@ -40,40 +38,31 @@ class FileContentLinter
 
       specs = rule[word]
 
-      @warning_types.each do |type|
-        spec = specs[type]
-        next unless spec
-        warning_response[type.to_sym] = spec
-        warning_response[:type] = type
-        warning_response[:message] = format_message(word, spec, specs['reason'])
-      end
-
+      warning_response = check_warning_types(specs, warning_response, word)
       warning_response[:reason] = specs['reason'] if specs['reason']
     end
-    # puts "warning_response: #{warning_response}"
+    warning_response
+  end
+
+  def check_warning_types(specs, warning_response, word)
+    @warning_types.each do |type|
+      spec = specs[type]
+      next unless spec
+      warning_response[type.to_sym] = spec
+      warning_response[:type] = type
+      warning_response[:message] = format_message(word, spec, specs['reason'])
+    end
     warning_response
   end
 
   def format_message(word, spec, reason = '')
-    if spec.is_a?(Array)
-      replacement = spec.each_with_index.map do |s, i|
-        if i == spec.length - 1
-          "`#{s}`"
-        elsif i == spec.length - 2
-          spec.length > 2 ? "`#{s}`, or " : "`#{s}` or "
-        else
-          "`#{s}`, "
-        end
-      end.join
-    else
-      replacement = spec
-    end
+    replacement = [spec].flatten.map { |s| "`#{s}`" }
 
-    if reason
-      "Consider replacing `#{word}` with #{replacement}. #{reason}."
-    else
-      "Consider replacing `#{word}` with #{replacement}."
-    end
+    sentence = replacement.to_sentence(last_word_connector: ', or ', two_words_connector: ' or ')
+    result = "Consider replacing `#{word}` with #{sentence}."
+
+    result << " Reason: #{reason}." if reason
+    result
   end
 
   attr_reader :file_contents, :rules

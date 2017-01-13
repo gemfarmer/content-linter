@@ -43,7 +43,8 @@
             }
         }, {
             "frontend": {
-                "replace": ["front end", "front end development"]
+                "replace": ["front end", "front end development", "front end engineering"],
+                "reason": "plain language"
             }
         }, {
             "Open Source": {

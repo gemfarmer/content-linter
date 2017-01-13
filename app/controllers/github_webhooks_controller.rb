@@ -41,33 +41,14 @@ class GithubWebhooksController < ActionController::Base
   end
 
   def github_pull_request(payload)
-    repo_name = payload['pull_request']['head']['repo']['full_name']
-    pull_request_number = payload['pull_request']['number']
-    last_commit = payload['pull_request']['head']['sha']
-
-    files_changed = PullRequestFiles.new(repo_name, last_commit).changed_files
+    @payload = payload
 
     files_changed.each do |file|
-      file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
-      content_linter_options = { file_contents: file_contents }
-
-      file_content_linter = FileContentLinter.new(content_linter_options)
-      content_errors = file_content_linter.lint
+      content_errors = file_content_linter(file).lint
 
       next if content_errors.empty?
       content_errors.each do |error|
-        error_message = error[:message]
-        line = error[:line]
-        filename = file[:filename]
-
-        Octokit.create_pull_request_comment(
-          repo_name,
-          pull_request_number,
-          error_message,
-          last_commit,
-          filename,
-          line
-        )
+        create_pull_request_comment(error[:message], file[:filename], error[:line])
       end
     end
 
@@ -81,35 +62,50 @@ class GithubWebhooksController < ActionController::Base
     # https://github.com/octokit/octokit.rb/blob/master/lib/octokit/client/pull_requests.rb
   end
 
+  def file_contents_for(file)
+    GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
+  end
+
+  def content_linter_options(file)
+    { file_contents: file_contents_for(file) }
+  end
+
+  def file_content_linter(file)
+    FileContentLinter.new(content_linter_options(file))
+  end
+
+  def repo_name
+    @payload['pull_request']['head']['repo']['full_name']
+  end
+
+  def pull_request_number
+    @payload['pull_request']['number']
+  end
+
+  def last_commit
+    @payload['pull_request']['head']['sha']
+  end
+
+  def files_changed
+    PullRequestFiles.new(repo_name, last_commit).changed_files
+  end
+
+  def create_pull_request_comment(error_message, filename, line)
+    Octokit.create_pull_request_comment(
+      repo_name,
+      pull_request_number,
+      error_message,
+      last_commit,
+      filename,
+      line
+    )
+  end
+
   def github_pull_request_review_comment(payload); end
 
   # Handle create event
   def github_create(payload)
     # TODO: handle create webhook
-  end
-
-  def find_lines(diff)
-    cleaned = diff.delete('+').delete('-').split(' ')
-    {
-      removed: {
-        from: cleaned[0].split(',')[0],
-        to: cleaned[0].split(',')[1]
-      },
-      added: {
-        from: cleaned[1].split(',')[0],
-        to: cleaned[1].split(',')[1]
-      }
-    }
-  end
-
-  def extract_lines(patch)
-    new_lines = []
-    lines = patch.split('@@')
-    lines = lines.slice(1, lines.length)
-    lines[0] = lines[0].strip
-    lines[1] = lines[1].strip
-    lines.each { |line| new_lines << line.split(/\r?\n/) }
-    find_lines(new_lines.flatten[0])
   end
 
   def webhook_secret(_payload)
