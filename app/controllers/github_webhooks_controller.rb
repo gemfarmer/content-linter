@@ -18,10 +18,16 @@ class GithubWebhooksController < ActionController::Base
     # client = Octokit::Client.new(login: 'gemfarmer-linter', password: Figaro.env.github_password)
     # client = Octokit::Client.new(access_token: Figaro.env.github_2FA_token)
 
-    # client.create_pull_request_comment("gemfarmer/github_webhook", 1, "error on this line", "2804e029a6e3fcd55dd5acc430a8a280d8c013cb", "second.md", 3)
+    # client.create_pull_request_comment(
+    #   "gemfarmer/github_webhook",
+    #   1,
+    #   "error on this line",
+    #   "2804e029a6e3fcd55dd5acc430a8a280d8c013cb",
+    #   "second.md",
+    #   3
+    # )
 
     # figure out what the commit hash is that we need to leave the comment on
-
 
     # where we are at:
     # just created a 2FA token to gain access to the github_webhooks repo
@@ -35,38 +41,14 @@ class GithubWebhooksController < ActionController::Base
   end
 
   def github_pull_request(payload)
-    repo_name = payload['pull_request']['head']['repo']['full_name']
-    pull_request_number = payload['pull_request']['number']
-    last_commit = payload['pull_request']['head']['sha']
-    diff_url = payload['pull_request']['diff_url']
-
-    files_changed = PullRequestFiles.new(repo_name, last_commit).changed_files
-    num_files_changed = files_changed.length
-    first_file = files_changed.first['filename']
+    @payload = payload
 
     files_changed.each do |file|
-      file_contents = GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
-      content_linter_options = { file_contents: file_contents }
+      content_errors = file_content_linter(file).lint
 
-      file_content_linter = FileContentLinter.new(content_linter_options)
-      content_errors = file_content_linter.lint
-
-      if !content_errors.empty?
-        content_errors.each do |error|
-
-          error_message = error[:message]
-          line = error[:line]
-          filename = file[:filename]
-
-          Octokit.create_pull_request_comment(
-            repo_name,
-            pull_request_number,
-            error_message,
-            last_commit,
-            filename,
-            line
-          )
-        end
+      next if content_errors.empty?
+      content_errors.each do |error|
+        create_pull_request_comment(error[:message], file[:filename], error[:line])
       end
     end
 
@@ -80,47 +62,53 @@ class GithubWebhooksController < ActionController::Base
     # https://github.com/octokit/octokit.rb/blob/master/lib/octokit/client/pull_requests.rb
   end
 
-
-
-  def github_pull_request_review_comment(payload)
-
+  def file_contents_for(file)
+    GithubFileContents.new(repo_name, file[:filename], last_commit).file_content
   end
+
+  def content_linter_options(file)
+    { file_contents: file_contents_for(file) }
+  end
+
+  def file_content_linter(file)
+    FileContentLinter.new(content_linter_options(file))
+  end
+
+  def repo_name
+    @payload['pull_request']['head']['repo']['full_name']
+  end
+
+  def pull_request_number
+    @payload['pull_request']['number']
+  end
+
+  def last_commit
+    @payload['pull_request']['head']['sha']
+  end
+
+  def files_changed
+    PullRequestFiles.new(repo_name, last_commit).changed_files
+  end
+
+  def create_pull_request_comment(error_message, filename, line)
+    Octokit.create_pull_request_comment(
+      repo_name,
+      pull_request_number,
+      error_message,
+      last_commit,
+      filename,
+      line
+    )
+  end
+
+  def github_pull_request_review_comment(payload); end
 
   # Handle create event
   def github_create(payload)
     # TODO: handle create webhook
   end
 
-  def find_lines(diff)
-    response = {}
-    cleaned = diff.gsub("+", '').gsub('-', '').split(' ')
-    response = {
-      removed: {
-        from: cleaned[0].split(',')[0],
-        to: cleaned[0].split(',')[1]
-      },
-      added: {
-        from: cleaned[1].split(',')[0],
-        to: cleaned[1].split(',')[1]
-      }
-    }
-  end
-
-  def extract_lines(patch)
-    response = {}
-    new_lines = []
-    lines = patch.split('@@')
-    lines = lines.slice(1, lines.length)
-    lines[0] = lines[0].strip
-    lines[1] = lines[1].strip
-    lines.each {|line| new_lines << line.split(/\r?\n/)}
-    new_lines = new_lines.flatten
-    response = find_lines(new_lines[0])
-  end
-
-  def webhook_secret(payload)
+  def webhook_secret(_payload)
     Figaro.env.github_webhooks_secret
   end
 end
-
-
