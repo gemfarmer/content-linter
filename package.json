@@ -1,0 +1,40 @@
+{
+  "name": "markdown-linter",
+  "version": "1.0.0",
+  "description": "node markdown processor",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint-md": "remark ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gemfarmer/content-linter.git"
+  },
+  "keywords": [
+    "retext",
+    "remark",
+    "lint",
+    "linter",
+    "markdown"
+  ],
+  "author": "18F",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gemfarmer/content-linter/issues"
+  },
+  "homepage": "https://github.com/gemfarmer/content-linter#readme",
+  "remarkConfig": {
+    "presets": [
+      "lint-recommended"
+    ]
+  },
+  "dependencies": {
+    "remark": "^6.2.0",
+    "remark-lint": "^5.4.0",
+    "vfile-reporter": "^3.0.0"
+  }
+}

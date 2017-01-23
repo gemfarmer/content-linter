@@ -43,7 +43,7 @@ class GithubWebhooksController < ActionController::Base
 
     files_changed.each do |file|
       content_errors = file_content_linter(file).lint
-
+      # content_errors = remark_processor(file).result
       next if content_errors.empty?
       content_errors.each do |error|
         create_pull_request_comment(error[:message], file[:filename], error[:line])
@@ -71,6 +71,10 @@ class GithubWebhooksController < ActionController::Base
   def file_content_linter(file)
     FileContentLinter.new(content_linter_options(file))
   end
+
+  # def remark_processor(file)
+  #   RemarkProcessor.new(file_contents_for(file))
+  # end
 
   def repo_name
     @payload['pull_request']['head']['repo']['full_name']
