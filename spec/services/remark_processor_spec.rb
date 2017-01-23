@@ -2,37 +2,30 @@ require 'rails_helper'
 
 describe RemarkProcessor do
   it 'it can process a file and return an object' do
-    remark_processor = RemarkProcessor.new('### Heading')
-
-    retex_response = RETEXT_RESPONSE
-
-    expect(remark_processor.process).to eq retex_response
+    remark_processor = RemarkProcessor.new('Hey guys {% something %}')
+    expect(remark_processor.process).to eq RETEXT_RESPONSE
   end
 
   it 'it formates the processed response' do
-    retex_response = RETEXT_RESPONSE
-
-    remark_processor = RemarkProcessor.new('### Heading')
+    remark_processor = RemarkProcessor.new('# Hey guys {% something %}')
 
     formatted_response = [{
       line: 1,
-      message: 'First heading level should be `1`'
+      message: '`guys` may be insensitive, use `people`, `persons`, `folks` instead'
     }]
 
-    expect(remark_processor.format(retex_response)).to eq formatted_response
+    expect(remark_processor.format(RETEXT_RESPONSE)).to eq formatted_response
   end
 
   it 'it returns a list of errors' do
-    retex_response = RETEXT_RESPONSE
-
-    remark_processor = RemarkProcessor.new('### Heading')
+    remark_processor = RemarkProcessor.new('# Hey guys {% something %}')
 
     allow(remark_processor).to receive(:process).
-      and_return(retex_response)
+      and_return(RETEXT_RESPONSE)
 
     formatted_response = [{
       line: 1,
-      message: 'First heading level should be `1`'
+      message: '`guys` may be insensitive, use `people`, `persons`, `folks` instead'
     }]
 
     expect(remark_processor.result).to eq formatted_response
