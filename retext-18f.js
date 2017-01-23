@@ -1,7 +1,10 @@
-var report = require('vfile-reporter');
-var remark = require('remark');
+// eslint-disable-line global-require
+/*eslint-env es6*/
+
+// var _report = require('vfile-reporter');
+// var _remark = require('remark');
 var lint = require('remark-lint');
-var retext = require('retext');
+// var _retext = require('retext');
 
 var unified = require('unified');
 var markdown = require('remark-parse');
@@ -24,7 +27,8 @@ process.argv.shift()  // skip node.exe
 process.argv.shift()  // skip name of js file
 
 var fileContents = process.argv.join(' ')
-var file = unified()
+
+unified()
   .use(markdown)
   .use(lint)
   .use(
@@ -42,8 +46,3 @@ var file = unified()
   .process(fileContents, function (err, file) {
     console.log(JSON.stringify(file.messages))
   });
-
-
-
-
-
