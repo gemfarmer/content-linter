@@ -42,8 +42,8 @@ class GithubWebhooksController < ActionController::Base
     @payload = payload
 
     files_changed.each do |file|
-      # content_errors = file_content_linter(file).lint
-      content_errors = remark_processor(file).result
+      content_errors = file_content_linter(file).lint
+      # content_errors = remark_processor(file).result
       next if content_errors.empty?
       content_errors.each do |error|
         # puts '-------------'
