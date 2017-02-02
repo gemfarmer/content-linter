@@ -1,6 +1,4 @@
 require 'octokit'
-require 'pry'
-require 'rb-readline'
 # app/controllers/github_webhooks_controller.rb
 class GithubWebhooksController < ActionController::Base
   include ::GithubWebhook::Processor

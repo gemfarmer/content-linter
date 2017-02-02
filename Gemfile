@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '2.3.3'
+
 gem 'figaro'
 gem 'github_webhook', '~> 1.0'
 gem 'jquery-rails'
