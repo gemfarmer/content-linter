@@ -16,8 +16,16 @@ class RemarkProcessor
     end
   end
 
+  def consolidate(errors)
+    errors.group_by { |i| i[:line] }.
+      map do |m|
+      { line: m[0], message: m[1].
+        map { |obj| obj[:message] }.join('/n') }
+    end
+  end
+
   def result
     processed_node = process
-    format(processed_node)
+    consolidate(format(processed_node))
   end
 end
