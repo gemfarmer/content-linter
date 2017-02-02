@@ -1,4 +1,3 @@
 Octokit.configure do |config|
-  config.login = 'gemfarmer-linter'
-  config.password = Figaro.env.github_password
+  config.access_token = Figaro.env.github_access_token
 end

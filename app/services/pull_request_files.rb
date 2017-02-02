@@ -1,5 +1,3 @@
-require 'pry'
-
 class PullRequestFiles
   def initialize(repo_name, last_commit)
     @repo_name = repo_name
