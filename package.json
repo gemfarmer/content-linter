@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node retext-18f.js ////sample/post.html",
     "lint-md": "remark ."
   },
   "repository": {
