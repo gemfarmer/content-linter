@@ -441,9 +441,11 @@ describe GithubWebhooksController do
       subject.request.headers['X-GitHub-Event'] = 'pull_request'
 
       pull_request_files = instance_double(PullRequestFiles)
+
       expect(PullRequestFiles).to receive(:new).
         with('gemfarmer/github_webhook', '90e60db2cde7a69b96e7fe7fa88217616b68c474').
         and_return(pull_request_files)
+
       expect(pull_request_files).to receive(:changed_files).and_return(files_changed)
 
       contents_response = {
@@ -466,25 +468,13 @@ describe GithubWebhooksController do
       }
 
       response_body = double('Sawyer::Resource', contents_response)
-
       allow(Octokit).to receive(:contents).with('gemfarmer/github_webhook', path: 'jp.md', ref: '90e60db2cde7a69b96e7fe7fa88217616b68c474').and_return(response_body)
 
       3.times do |line_num|
         expect(Octokit).to receive(:create_pull_request_comment).with(
           'gemfarmer/github_webhook',
           19,
-          'Consider replacing `crazy` with `chaotic`, `unusual`, `complex`, or `incredible`.',
-          '90e60db2cde7a69b96e7fe7fa88217616b68c474',
-          'jp.md',
-          line_num + 1
-        )
-      end
-
-      3.times do |line_num|
-        expect(Octokit).to receive(:create_pull_request_comment).with(
-          'gemfarmer/github_webhook',
-          19,
-          'Consider replacing `dropdown` with `drop-down menu` or `drop down`.',
+          'Replace “crazy” with “brainsick”, “demented”, “distracted”, “disturbed”, “mad”, “sick”, “unbalanced”, “unhinged”, “insane”, “half-baked”, “screwball”, “softheaded”, “impractical”, “dotty”, “gaga”, “enamored”, “infatuated”, “in love”, “smitten”, “soft on”, “taken with”, “loving”, “excited”, “strange”, “unusual”, “enthusiastic”, “loony”, “looney”, “weirdo”, “lunatic”, “madman”, “maniac”/n`crazy` may be insensitive, use `rude`, `mean`, `disgusting`, `vile`, `person with symptoms of mental illness`, `person with mental illness`, `person with symptoms of a mental disorder`, `person with a mental disorder` instead/n`dropdowns` is misspelt',
           '90e60db2cde7a69b96e7fe7fa88217616b68c474',
           'jp.md',
           line_num + 1

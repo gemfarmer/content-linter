@@ -1,0 +1,17 @@
+{
+    "extends": "eslint:recommended",
+    "plugins": [
+        "import"
+    ],
+    "environments": {
+      "node": true
+    },
+    "globals": {
+      "require": true,
+      "console": true,
+      "process": true
+    },
+    "rules": {
+      "no-console": 0
+    }
+}
