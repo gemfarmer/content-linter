@@ -1,10 +1,12 @@
 // eslint-disable-line global-require
 /*eslint-env es6*/
 
-// var _report = require('vfile-reporter');
+var report = require('vfile-reporter');
 // var _remark = require('remark');
 var lint = require('remark-lint');
 // var _retext = require('retext');
+
+var fs = require('fs');
 
 var unified = require('unified');
 var markdown = require('remark-parse');
@@ -23,10 +25,16 @@ var simplify = require('retext-simplify');
 
 var overuse = require('retext-overuse');
 
+var isCLI = false;
 process.argv.shift()  // skip node.exe
 process.argv.shift()  // skip name of js file
 
 var fileContents = process.argv.join(' ')
+if (fileContents.slice(0,4) === '////') {
+  var filename = fileContents.slice(4, fileContents.length);
+  fileContents = fs.readFileSync(filename, 'utf8');
+  isCLI = true;
+}
 
 unified()
   .use(markdown)
@@ -44,5 +52,9 @@ unified()
   .use(remark2rehype)
   .use(html)
   .process(fileContents, function (err, file) {
-    console.log(JSON.stringify(file.messages))
+    if (isCLI) {
+      console.log(report(file))
+    } else {
+      console.log(JSON.stringify(file.messages))
+    }
   });
