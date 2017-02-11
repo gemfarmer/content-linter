@@ -1,0 +1,13 @@
+current directory: /Users/brianhedberg/Projects/markdown-linter/vendor/bundle/ruby/2.3.0/gems/json-2.0.3/ext/json
+/Users/brianhedberg/.rvm/rubies/ruby-2.3.3/bin/ruby -r ./siteconf20170210-18588-1laqr2n.rb extconf.rb 
+creating Makefile
+
+current directory: /Users/brianhedberg/Projects/markdown-linter/vendor/bundle/ruby/2.3.0/gems/json-2.0.3/ext/json
+make "DESTDIR=" clean
+
+current directory: /Users/brianhedberg/Projects/markdown-linter/vendor/bundle/ruby/2.3.0/gems/json-2.0.3/ext/json
+make "DESTDIR="
+make: Nothing to be done for `all'.
+
+current directory: /Users/brianhedberg/Projects/markdown-linter/vendor/bundle/ruby/2.3.0/gems/json-2.0.3/ext/json
+make "DESTDIR=" install
