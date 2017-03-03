@@ -4,4 +4,5 @@ Rails.application.routes.draw do
   resource :users
 
   get '/auth/github/callback', to: 'users#create'
+  get '/' => 'home#show'
 end
