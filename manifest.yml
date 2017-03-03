@@ -1,0 +1,3 @@
+---
+name: content-linter
+command: bundle exec rails s
