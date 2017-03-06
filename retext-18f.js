@@ -21,7 +21,8 @@ var english = require('retext-english');
 var quotes = require('retext-quotes');
 
 var equality = require('retext-equality');
-var simplify = require('retext-simplify');
+// var simplify = require('retext-simplify');
+var simplify = require('retext-18f-simplify');
 
 var overuse = require('retext-overuse');
 
@@ -42,12 +43,12 @@ unified()
   .use(
     remark2retext,
     unified()
-      .use(overuse)
-      .use(equality)
+      // .use(overuse)
+      // .use(equality)
       .use(simplify)
-      .use(spell, dictionary)
+      // .use(spell, dictionary)
       .use(english)
-      .use(quotes)
+      // .use(quotes)
   )
   .use(remark2rehype)
   .use(html)
