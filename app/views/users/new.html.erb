@@ -1,0 +1,13 @@
+<% content_for :title do %>18F Micro-purchase - Login<% end %>
+<% content_for :description do %>Login or create an account to participate in Micro-purchase auctions.<% end %>
+
+<div class="usa-grid">
+  <div class="usa-width-one-half">
+    <h1>Sign in</h1>
+    <p>
+      <%= link_to 'Authorize with GitHub',
+        '/auth/github',
+        class: 'usa-button usa-button usa-button-outline' %>
+    </p>
+  </div>
+</div>
